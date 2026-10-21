@@ -38,9 +38,12 @@ job is still queued or running.
 state, so it survives reloads and updates itself. Its text result is what you tell the user,
 briefly. Research cards: `backtest` with `{job_ref}` right after `backtest.run.start` (it follows
 the job to the result) or `{run_ref}` for a saved run; `task` with `{}` for this conversation's
-progress; `leaderboard` with `{sort, query?, locale}`; `installed` with `{locale}`; `glossary`
-with `{metrics, locale}` to explain metric names. Configuration, monitor and diagnosis cards
-exist only in EdgePilot Live.
+progress; `leaderboard` with `{sort, query?, locale}` (sort `return`, `drawdown`, `sharpe` or
+`published`); `installed` with `{locale}`; `glossary` with `{metrics, locale}` to explain metric
+names, where metrics uses exactly these names (`max_drawdown_pct`, not `max_drawdown`): `return_pct`, `annualized_return_pct`, `max_drawdown_pct`, `sharpe`, `sortino`, `profit_factor`, `win_rate`, `realized_pnl`, `trades_per_30d`, `median_holding_minutes`, `max_consecutive_losses`, `worst_trade_pct`, `capacity_usd`, `match_score`, `order_fraction`, `max_total_exposure_fraction`, `max_equivalent_leverage`, `leverage`, `starting_balance`, `fee_bps`.
+locale is `en`, `zh-CN`, `zh-TW` or `ko`. Configuration, monitor and diagnosis cards exist only in
+EdgePilot Live. When the card call answers an error naming a field and its valid values, correct
+that field and call once more instead of answering without the card.
 
 Route every ordinary chat request for finding or recommending strategies through
 `edgepilot_strategy_search`, including identity/keyword lookup, explicit hard filters,
