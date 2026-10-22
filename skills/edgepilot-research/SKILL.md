@@ -7,13 +7,14 @@ description: Route anonymous public strategy discovery and reproducible historic
 
 The Node Ready Bridge always exposes `edgepilot_runtime_status`,
 `edgepilot_runtime_start`, `edgepilot_runtime_update` and `edgepilot_runtime_repair`, even
-before Runtime exists. The bridge automatically prepares the release-bound Runtime before first business use; never treat an older compatible Runtime as ready. When Runtime is ready, use the five Host meta tools:
+before Runtime exists. The bridge automatically prepares the release-bound Runtime before first business use; never treat an older compatible Runtime as ready. When Runtime is ready, use the six Host meta tools:
 
 1. `edgepilot_connection_list`
 2. `edgepilot_tool_search`
 3. `edgepilot_tool_get`
 4. `edgepilot_tool_execute`
 5. `edgepilot_result_present`
+6. `edgepilot_view_present` (in-chat cards, below)
 
 Search for an operation, fetch its exact current descriptor, then execute with the returned
 `schema_revision`. Do not invent dynamic tools, copy operation schemas into this plugin or
@@ -30,6 +31,19 @@ The normal research route is catalog search/recommend, exact inspect/version lis
 configuration resolve, backtest start, durable job status and result get. Runtime workflow
 hints are navigation, not execution authority. Never repeat a start call merely because a
 job is still queued or running.
+
+## In-chat cards
+
+`edgepilot_view_present` shows one EdgePilot card in the conversation; the Runtime keeps its
+state, so it survives reloads and updates itself. Its text result is what you tell the user,
+briefly. Research cards: `backtest` with `{job_ref}` right after `backtest.run.start` (it follows
+the job to the result) or `{run_ref}` for a saved run; `task` with `{}` for this conversation's
+progress; `leaderboard` with `{sort, query?, locale}` (sort `return`, `drawdown`, `sharpe` or
+`published`); `installed` with `{locale}`; `glossary` with `{metrics, locale}` to explain metric
+names, where metrics uses exactly these names (`max_drawdown_pct`, not `max_drawdown`): `return_pct`, `annualized_return_pct`, `max_drawdown_pct`, `sharpe`, `sortino`, `profit_factor`, `win_rate`, `realized_pnl`, `trades_per_30d`, `median_holding_minutes`, `max_consecutive_losses`, `worst_trade_pct`, `capacity_usd`, `match_score`, `order_fraction`, `max_total_exposure_fraction`, `max_equivalent_leverage`, `leverage`, `starting_balance`, `fee_bps`.
+locale is `en`, `zh-CN`, `zh-TW` or `ko`. Configuration, monitor and diagnosis cards exist only in
+EdgePilot Live. When the card call answers an error naming a field and its valid values, correct
+that field and call once more instead of answering without the card.
 
 Route every ordinary chat request for finding or recommending strategies through
 `edgepilot_strategy_search`, including identity/keyword lookup, explicit hard filters,
@@ -83,7 +97,7 @@ not force the questionnaire.
    Research switches never pause work: running backtests finish on the previous version
    and the new Host shows their results. Report failures and their script-provided
    recovery action.
-   For `stale_session`, reload the plugin session rather than attempting a downgrade.
+   For `stale_session`, reload the plugin session. A lower version number is not stale: `edgepilot_runtime_start` installs this plugin's bound release.
    For `host_start_timeout`, tell the user that reloading or restarting Cursor does not
    restart the Host. The Host is a separate sign-in task. Do not invent a shell command
    to end it, and do not ask the user to end it in Task Scheduler. Call
@@ -97,6 +111,10 @@ not force the questionnaire.
    that interactive card and end the turn. A brief instruction to continue in the card is
    enough; do not repeat questionnaire choices in chat or call another question/selection
    tool. Keep all seven choices, review and recommendation inside that one App.
+   EdgePilot keeps the questionnaire and its recommendation, and the card passes you their
+   state. When the user later refers to a recommendation by position or role ("the first
+   one", "the safer one"), use exactly the strategy versions that card context names, in the
+   left-to-right order it gives; do not search again or substitute a newer version.
    The tool does not report rendering visibility. Missing model-visible HTML, missing
    acknowledgement or delayed rendering is unknown, not evidence of failure. Never claim
    the card did not appear based on that absence and never automatically start text onboarding
@@ -119,7 +137,7 @@ not force the questionnaire.
 5. After the last answer, use a separate assistant turn to summarize the selected values
    and ask only for explicit confirmation. Do not combine that confirmation request with
    another question and do not call recommendation before confirmation.
-6. Only in this explicitly requested textual onboarding fallback, call the hidden App/fallback
+6. Only in this explicitly requested textual onboarding fallback, call the hidden fallback
    handler `edgepilot_strategy_recommend` once with `questionnaire_version="2.0"`, the seven
    confirmed values and matching locale. Present exactly best fit, relatively steadier and
    more aggressive while preserving versions, evidence, trade-offs and warnings.
@@ -147,7 +165,7 @@ update or repair anything unless the user asks.
 
 ## Upgrade recovery
 
-The plugin ships its fixed-release lifecycle entry. Upgrades are forward-only; do not invoke
+The plugin ships its fixed-release lifecycle entry. That release replaces the installed Runtime even when its version number is lower. An interrupted switch of the same release still resumes forward; do not invoke
 rollback or search for system Python. Inspect a pending lifecycle operation instead of starting
 a duplicate. Active backtests or writes must complete or be explicitly cancelled before upgrade.
 Research never uses Live task management or reads Live state.
